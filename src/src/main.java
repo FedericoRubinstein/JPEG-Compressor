@@ -1,16 +1,13 @@
 import java.util.Scanner;
 
 public class main {
-    public static void println(String text){
-        System.out.println(text);
-    }
 
     public static void welcome_menu () {
-        println("Welcome!");
-        println("Choose an option:");
-        println("\t 1) Compress");
-        println("\t 2) Decompress");
-        println("\t 0) Exit");
+        IO.println("Welcome!");
+        IO.println("Choose an option:");
+        IO.println("\t 1) Compress");
+        IO.println("\t 2) Decompress");
+        IO.println("\t 0) Exit");
     }
 
     public static void main(String[] args) {
@@ -25,33 +22,46 @@ public class main {
             welcome_menu();
             switch (scanner.nextLine()) {
                 case "1":
-                    println("You selected compression");
-                    println("Please, copy the absolute path of the file you want to compress: ");
+                    IO.println("You selected compression");
+                    IO.println("Please, copy the absolute path of the file you want to compress: ");
+
                     path = scanner.nextLine();
-                    try {
-                        println("Compressing...");
-                    } catch(Exception e) {
-                        println("Error while compressing!");
-                    } break;
+                    if (IO.checkExists(path)) {
+                        try {
+                            IO.println("Obtaining file...");
+                            ppmFile image = new ppmFile(path);
+                            IO.println("Compressing...");
+                        } catch (Exception e) {
+                            IO.println("Error while compressing!");
+                        }
+                    } else {
+                        IO.println("The file doesn't exist!\n");
+                    }
+                    break;
+
 
                 case "2":
-                    println("You selected decompress");
-                    println("Please, copy the absolute path of the file you want to decompress: ");
+                    IO.println("You selected decompress");
+                    IO.println("Please, copy the absolute path of the file you want to decompress: ");
                     path = scanner.nextLine();
-                    try {
-                        println("Decompressing...");
-                    } catch(Exception e) {
-                        println("Error while decompressing!");
-                    } break;
+                    if (IO.checkExists(path)) {
+                        try {
+                            IO.println("Decompressing...");
+                        } catch(Exception e) {
+                            IO.println("Error while decompressing!");
+                        }
+                    } else {
+                        IO.println("The file doesn't exist!\n");
+                    }
+                    break;
 
                 case "0":
-                    println("Goodbye!");
+                    IO.println("Goodbye!");
                     exit = true;
                     break;
 
                 default:
-                    println("Wrong option!");
-                    println("");
+                    IO.println("Wrong option!\n");
                     break;
             }
         }

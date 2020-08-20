@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class ppmFile {
     protected byte[] content;
     protected int size; //In bytes
@@ -12,27 +14,30 @@ public class ppmFile {
     public ppmFile() {}
 
     public ppmFile(String path){
-
+        byte[] content = IO.getFile(path);
+        readHeader(content);
+        this.content = Arrays.copyOfRange(content, this.headerSize, content.length);
+        this.size = this.content.length;
     }
 
     //Reads the header from the full file content and sets the values header, height, width and resolution:
     public void readHeader(byte[] content){
-        String header = "";
+        StringBuilder header = new StringBuilder();
         char c;
         int j = 0;
         for (int i = 0; i < 3; ++i){
             c = (char) content[j];
-            header += c;
+            header.append(c);
             ++j;
             if(c == '#')--i;
             while((c = (char) content[j]) != '\n') {
-                header += c;
+                header.append(c);
                 ++j;
             }
-            header += c;
+            header.append(c);
             ++j;
         }
-        this.header = header;
+        this.header = header.toString();
         this.headerSize = header.length();
 
         j = 0;
@@ -47,32 +52,32 @@ public class ppmFile {
                     while(header.charAt(j) != '\n')++j;
                     ++j;
                 } else if(i==1){
-                    String width = "";
-                    String height = "";
+                    StringBuilder width = new StringBuilder();
+                    StringBuilder height = new StringBuilder();
                     while(c != ' '){
-                        width += c;
+                        width.append(c);
                         ++j;
                         c = header.charAt(j);
                     }
                     ++j;
                     c = header.charAt(j);
                     while(c != '\n' && c != '#' && c != ' '){
-                        height += c;
+                        height.append(c);
                         ++j;
                         c = header.charAt(j);
                     }
                     while(header.charAt(j)!='\n')++j;
                     ++j;
-                    this.width = Integer.parseInt(width);
-                    this.height = Integer.parseInt(height);
+                    this.width = Integer.parseInt(width.toString());
+                    this.height = Integer.parseInt(height.toString());
                 } else {
-                    String resolution = "";
+                    StringBuilder resolution = new StringBuilder();
                     while(c != '\n'){
-                        resolution += c;
+                        resolution.append(c);
                         ++j;
                         c = header.charAt(j);
                     }
-                    this.resolution = Integer.parseInt(resolution);
+                    this.resolution = Integer.parseInt(resolution.toString());
                 }
             }
         }
