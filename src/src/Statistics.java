@@ -10,6 +10,7 @@ public class Statistics {
     private int FinalSize;
     private int TotalCompression;
     private double CompressionSpeedAvg;
+    private int subType;
 
     //Constructor
     public Statistics(){}
@@ -23,6 +24,7 @@ public class Statistics {
     public void setFinalSize(int FinalSize){this.FinalSize = FinalSize;}
     public void setTotalCompression(int TotalCompression){this.TotalCompression = TotalCompression;}
     public void setCompressionSpeedAvg(double CompressionSpeedAvg){this.CompressionSpeedAvg = CompressionSpeedAvg;}
+    public void setSubType(int subType){this.subType = subType;}
 
     //Getters:
     public int getCompressionOrDecompression() {return this.compressionOrDecompression;}
@@ -33,6 +35,7 @@ public class Statistics {
     public int getFinalSize() {return this.FinalSize;}
     public int getTotalCompression() {return this.TotalCompression;}
     public double getCompressionSpeedAvg() {return this.CompressionSpeedAvg;}
+    public int getSubType(){return this.subType;}
 
     //Time handlers:
     public void startClock(){
@@ -61,10 +64,11 @@ public class Statistics {
 
     //Print statistics
     public void print(){
-        String operation = "Compression";
-        if (this.getCompressionOrDecompression() == 1) operation = "Decompression";
+        String operation = this.getCompressionOrDecompression() == 0 ? "Compression" : "Decompression";
         IO.println("***********************************************************************\n\nStatistics:\n");
-        IO.println("\tOperation used: " + operation);
+        IO.println("\tOperation: " + operation);
+        String downsampling = this.subType == 0 ? "4:4:4" : this.subType == 1 ? "4:2:2" : "4:2:0";
+        IO.println("\tDownsampling used: " + downsampling);
         IO.println("\tTime Spent: " +
                 BigDecimal.valueOf(this.getTotalTime()*Math.pow(10, -9)).setScale(4, RoundingMode.HALF_UP).doubleValue()
                 + " seconds. (" + this.getTotalTime() +" nanoseconds)");

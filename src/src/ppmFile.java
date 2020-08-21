@@ -1,8 +1,8 @@
 import java.util.Arrays;
 
 public class ppmFile {
-    protected byte[] content;
-    protected int size; //In bytes
+    private byte[] content;
+    private int size; //In bytes
     private String header;
     private int headerSize;
     private int height;
@@ -21,7 +21,7 @@ public class ppmFile {
     }
 
     //Reads the header from the full file content and sets the values header, height, width and resolution:
-    public void readHeader(byte[] content){
+    private void readHeader(byte[] content){
         StringBuilder header = new StringBuilder();
         char c;
         int j = 0;
