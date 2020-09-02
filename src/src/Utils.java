@@ -315,7 +315,7 @@ public class Utils {
         int col = posTable[1];
 
         //Encodes the row in the table:
-        encoding.append("1".repeat(Math.max(0, row)));
+        for(int i = 0; i < row; ++i) encoding.append("1");
         if(row<16) encoding.append("0");
 
         //Encodes the column in the table:
@@ -398,4 +398,140 @@ public class Utils {
     /*****************************************************************************************************************/
     /********************************************DECOMPRESSION FUNCTIONS:*********************************************/
     /*****************************************************************************************************************/
+
+
+    public static String byteToBinaryString(byte n) {
+        StringBuilder sb = new StringBuilder("00000000");
+        for (int bit = 0; bit < 8; bit++) {
+            if (((n >> bit) & 1) > 0) {
+                sb.setCharAt(7 - bit, '1');
+            }
+        }
+        return sb.toString();
+    }
+
+    //Returns the number in the position [row][col] of the table used to code DC coefficients.
+    public static int getNumberInDCTable(int row, int col){
+        //Exceptions:
+        if(row == 0) return 0;
+        if(row == 16) return 32768;
+
+        int border = (int) (Math.pow(2, row) - 1);
+        int borderInside = (int) (Math.pow(2, row-1) - 1);
+        //positive number:
+        if(col >= border-borderInside) return col;
+            //negative number:
+        else return -(border-col);
+    }
+
+    //Find the position in the AC coefficients table and returns {runLength, row}, {-1,-1} if not found:
+    public static int[] findPosAcTable (String ac, int lumOrChr){
+        for(int i = 0; i < 16; ++i){
+            for(int j = 0; j < 10; ++j){
+                if(lumOrChr == 0 && ac.equals(LuminanceACCoefficients[i][j])) return new int[]{i,j+1};
+                else if(lumOrChr == 1 && ac.equals(ChrominanceACCoefficients[i][j])) return new int[]{i,j+1};
+            }
+        }
+        return new int[]{-1,-1};
+    }
+
+    //Returns the 8x8 block of the zig-zag-order array:
+    public static int[][] zigZagToBlock(int[] zigZag){
+        int[][] block = new int[8][8];
+
+        int i = 0;
+        int j = 0;
+        boolean down = false;
+        boolean up = false;
+        for(int k = 0; k < 64; ++k){
+            block[i][j] = zigZag[k];
+            if(i == 0 && !down){
+                ++j;
+                down = true;
+                up = false;
+            } else if (i == 7 && !up){
+                ++j;
+                down = false;
+                up = true;
+            }else if(j == 0 && !up){
+                ++i;
+                down = false;
+                up = true;
+            } else if (j == 7 && !down){
+                ++i;
+                down = true;
+                up = false;
+            } else if(down){
+                ++i;
+                --j;
+            } else if(up){
+                --i;
+                ++j;
+            }
+        }
+
+        return block;
+    }
+
+    //Returns the original 8x8 table of quantized (quality of 50%):
+    //lumOrChr = 0 for luminance quantization, lumOrChr = 1 for chrominance quantization
+    public static int[][] getDequantization(int[][] quantizedBlock, int lumOrChr){
+        int[][] dctBlock = new int[8][8];
+
+        for(int i = 0; i < 8; ++i){
+            for(int j = 0; j < 8; ++j){
+                if(lumOrChr == 0) dctBlock[i][j] = Math.round(quantizedBlock[i][j] * LoshellerMatrix[i][j]);
+                else dctBlock[i][j] = Math.round(quantizedBlock[i][j] * ChrominanceQuantizationMatrix[i][j]);
+            }
+        }
+
+        return dctBlock;
+    }
+
+    //Returns the original block of the DCT block dctBlock:
+    public static double[][] getInverseDCT(int[][] dctBlock){
+        double[][] D = new double[8][8];
+        //D' x dctBlock:
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                for (int k = 0; k < 8; k++) {
+                    D[i][j] += DCTMatrixT[i][k] * dctBlock[k][j];
+                }
+            }
+        }
+        double[][] DT = new double[8][8];
+        double[][] d = new double[8][8];
+        //D' x dctBlock x D:
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                for (int k = 0; k < 8; k++) {
+                    DT[i][j] += D[i][k] * DCTMatrix[k][j];
+                }
+                d[i][j] =  DT[i][j];
+            }
+        }
+        return d;
+    }
+
+    //Returns the RGB pixel in Y'CbCr:
+    public static byte[] YCbCrtoRGB(int y, int cb, int cr){
+        byte[] RGB = new byte[3];
+        int r, g, b;
+
+        r = Math.round((float)(1.164 * (y - 16) + 1.596 * (cr - 128)));
+        g = Math.round((float)(1.164 * (y - 16) - 0.813 * (cr - 128) - 0.391 * (cb - 128)));
+        b =  Math.round((float)(1.164 * (y - 16)+ 2.018 * (cb - 128)));
+        if(r > 255) r = 255;
+        if(g > 255) g = 255;
+        if(b > 255) b = 255;
+        if(r < 0) r = 0;
+        if(g < 0) g = 0;
+        if(b < 0) b = 0;
+
+        RGB[0] = (byte)r;
+        RGB[1] = (byte)g;
+        RGB[2] = (byte)b;
+
+        return RGB;
+    }
 }

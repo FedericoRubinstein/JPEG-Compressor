@@ -1,6 +1,7 @@
 import java.util.Arrays;
 
-public class ppmFile {
+public class File {
+    private String type;
     private byte[] content;
     private int size; //In bytes
     private String header;
@@ -11,11 +12,17 @@ public class ppmFile {
 
 
     //Constructors:
-    public ppmFile() {}
+    public File() {}
 
-    public ppmFile(String path){
+    public File(String path) throws Exception {
+
+        String fileType = path.substring(path.lastIndexOf('.') + 1);
+        if (!(fileType.equals("ppm") || fileType.equals("comp"))){
+            throw new Exception("Wrong file type!");
+        }
+        this.type = fileType;
         byte[] content = IO.getFile(path);
-        readHeader(content);
+        readHeader(content);  // The header is the same for both compressed and uncompressed files.
         this.content = Arrays.copyOfRange(content, this.headerSize, content.length);
         this.size = this.content.length;
     }

@@ -25,6 +25,17 @@ public class IO {
         return content;
     }
 
+    //Saves the content to the file at Path
+    public static void saveFile(String Path, byte[] Content){
+        try {
+            Files.createDirectories(Paths.get(Path).getParent());
+            Files.write(Paths.get(Path), Content);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //Outputs through the console
     public static void println(String text){
